@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VintedPro — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">Vinted<span>Pro</span></div>
+      <nav>
+        <button class="nav-item active" data-page="dashboard"><i class="ti ti-layout-dashboard"></i><span>Dashboard</span></button>
+        <button class="nav-item" data-page="commandes"><i class="ti ti-shopping-bag"></i><span>Commandes</span></button>
+        <button class="nav-item" data-page="stock"><i class="ti ti-box"></i><span>Stock</span></button>
+        <button class="nav-item" data-page="marge"><i class="ti ti-calculator"></i><span>Marge</span></button>
+        <button class="nav-item" data-page="niches"><i class="ti ti-flame"></i><span>Niches</span></button>
+        <button class="nav-item" data-page="annonces"><i class="ti ti-sparkles"></i><span>Annonces IA</span></button>
+        <button class="nav-item" data-page="compta"><i class="ti ti-report-money"></i><span>Compta</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="objectif-bar">
+          <div class="objectif-label">Objectif 3000€ <span id="sb-pct">0%</span></div>
+          <div class="objectif-track"><div class="objectif-fill" id="sb-fill"></div></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-header"><h1>Vue d'ensemble</h1><div class="date" id="today-date"></div></div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi-label">Revenu ce mois</div><div class="kpi-value" id="kpi-revenu">0,00 €</div><div class="kpi-sub" id="kpi-revenu-sub">0 ventes</div></div>
+          <div class="kpi"><div class="kpi-label">Bénéfice net</div><div class="kpi-value success" id="kpi-marge">0,00 €</div><div class="kpi-sub" id="kpi-marge-sub">0% de marge</div></div>
+          <div class="kpi"><div class="kpi-label">Articles en stock</div><div class="kpi-value" id="kpi-stock">0</div><div class="kpi-sub">références</div></div>
+          <div class="kpi"><div class="kpi-label">Vers 3000 €/mois</div><div class="kpi-value accent" id="kpi-obj">0%</div><div class="kpi-sub" id="kpi-obj-sub">objectif mensuel</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Dernières ventes</span></div>
+          <div id="dash-last-sales"></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Top niches du mois</span></div>
+            <div id="dash-top-niches"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Simulation fin de mois</span></div>
+            <div id="dash-simulation"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMMANDES -->
+      <section id="page-commandes" class="page">
+        <div class="page-header"><h1>Commandes Vinted</h1></div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Enregistrer une vente</div>
+          <div class="form-row">
+            <div class="form-group"><label>Article vendu</label><input type="text" id="v-article" placeholder="T-shirt The Strokes"></div>
+            <div class="form-group"><label>Niche</label><input type="text" id="v-niche" placeholder="Rock indie"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Prix de vente Vinted (€)</label><input type="number" id="v-prix" placeholder="22" step="0.01"></div>
+            <div class="form-group"><label>Prix d'achat Temu (€)</label><input type="number" id="v-achat" placeholder="13" step="0.01"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Frais livraison Temu (€)</label><input type="number" id="v-livraison" value="2" step="0.01"></div>
+            <div class="form-group"><label>Statut</label>
+              <select id="v-statut">
+                <option>À commander</option>
+                <option>Commandé Temu</option>
+                <option>Expédié</option>
+                <option>Finalisé</option>
+              </select>
+            </div>
+          </div>
+          <div class="marge-preview" id="v-preview"></div>
+          <button class="btn btn-accent" onclick="addVente()"><i class="ti ti-plus"></i> Enregistrer</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Toutes les ventes</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" id="search-ventes" placeholder="Rechercher..." style="width:160px;padding:6px 10px;font-size:12px" oninput="renderVentes()">
+              <span class="badge badge-muted" id="ventes-count">0</span>
+            </div>
+          </div>
+          <div id="ventes-table"></div>
+        </div>
+      </section>
+
+      <!-- STOCK -->
+      <section id="page-stock" class="page">
+        <div class="page-header"><h1>Stock</h1></div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px">Ajouter au stock</div>
+          <div class="form-row">
+            <div class="form-group"><label>Article</label><input type="text" id="s-article" placeholder="T-shirt Godspeed You!"></div>
+            <div class="form-group"><label>Niche</label><input type="text" id="s-niche" placeholder="Post-rock"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Quantité</label><input type="number" id="s-qty" value="1" min="1"></div>
+            <div class="form-group"><label>Prix unitaire Temu (€)</label><input type="number" id="s-prix" placeholder="13" step="0.01"></div>
+          </div>
+          <button class="btn btn-accent" onclick="addStock()"><i class="ti ti-plus"></i> Ajouter au stock</button>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Inventaire</span>
+            <span class="badge badge-muted" id="stock-count">0 articles</span>
+          </div>
+          <div id="stock-table"></div>
+        </div>
+      </section>
+
+      <!-- MARGE -->
+      <section id="page-marge" class="page">
+        <div class="page-header"><h1>Calculateur de marge</h1></div>
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:16px">Paramètres</div>
+            <div class="form-group" style="margin-bottom:12px"><label>Prix de vente Vinted (€)</label><input type="number" id="m-vente" placeholder="22" oninput="calcMarge()" step="0.01"></div>
+            <div class="form-group" style="margin-bottom:12px"><label>Prix d'achat Temu (€)</label><input type="number" id="m-achat" placeholder="13" oninput="calcMarge()" step="0.01"></div>
+            <div class="form-group" style="margin-bottom:12px"><label>Frais livraison Temu (€)</label><input type="number" id="m-liv" value="2" oninput="calcMarge()" step="0.01"></div>
+            <div class="form-group" style="margin-bottom:12px"><label>Frais emballage (€)</label><input type="number" id="m-emb" value="0.5" oninput="calcMarge()" step="0.01"></div>
+          </div>
+          <div>
+            <div class="card" style="margin-bottom:16px">
+              <div class="card-title" style="margin-bottom:16px">Résultat</div>
+              <div class="marge-big" id="m-result">
+                <div class="marge-row"><span>Marge brute</span><span id="m-brut">—</span></div>
+                <div class="marge-row"><span>Coûts totaux</span><span id="m-couts">—</span></div>
+                <div class="marge-divider"></div>
+                <div class="marge-row bold"><span>Marge nette</span><span id="m-nette" class="success">—</span></div>
+                <div class="marge-row bold"><span>% marge</span><span id="m-pct">—</span></div>
+                <div class="marge-verdict" id="m-verdict"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:12px">Simulation 3000€/mois</div>
+              <div id="m-simulation" style="font-size:13px;color:#888;line-height:1.8">Remplis les champs pour voir.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NICHES -->
+      <section id="page-niches" class="page">
+        <div class="page-header"><h1>Niches tendances 2026</h1></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="ai-label"><i class="ti ti-sparkles"></i> Intelligence — tes niches les plus performantes</div>
+          <div id="niche-ai-text" style="font-size:13px;color:#888;margin-top:6px">Tes données apparaîtront ici après quelques ventes.</div>
+        </div>
+        <div class="niche-grid" id="niche-grid"></div>
+      </section>
+
+      <!-- ANNONCES IA -->
+      <section id="page-annonces" class="page">
+        <div class="page-header"><h1>Générateur d'annonces IA</h1></div>
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group"><label>Nom de l'article</label><input type="text" id="a-article" placeholder="T-shirt The Strokes"></div>
+            <div class="form-group"><label>Univers / niche</label><input type="text" id="a-niche" placeholder="Rock indie, années 2000"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Taille</label>
+              <select id="a-taille"><option>XS</option><option>S</option><option>M</option><option selected>L</option><option>XL</option><option>XXL</option></select>
+            </div>
+            <div class="form-group"><label>État</label>
+              <select id="a-etat"><option>Neuf avec étiquette</option><option>Très bon état</option><option>Bon état</option></select>
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:16px"><label>Prix de vente (€)</label><input type="number" id="a-prix" placeholder="22"></div>
+          <button class="btn btn-accent" id="gen-btn" onclick="genAnnonce()"><i class="ti ti-sparkles"></i> Générer l'annonce</button>
+        </div>
+        <div class="card" id="annonce-result" style="display:none">
+          <div class="card-header">
+            <span class="card-title">Annonce prête à poster</span>
+            <button class="btn" onclick="copyAnnonce()"><i class="ti ti-copy"></i> Copier</button>
+          </div>
+          <div id="annonce-titre" class="annonce-titre"></div>
+          <div id="annonce-desc" class="annonce-desc"></div>
+          <div id="annonce-tags" class="annonce-tags"></div>
+        </div>
+      </section>
+
+      <!-- COMPTA -->
+      <section id="page-compta" class="page">
+        <div class="page-header">
+          <h1>Compta</h1>
+          <button class="btn" onclick="exportCSV()"><i class="ti ti-download"></i> Export CSV</button>
+        </div>
+        <div class="kpi-grid" id="compta-kpis"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Toutes les transactions</span>
+            <select id="compta-filtre" onchange="renderCompta()" style="font-size:12px;padding:5px 8px">
+              <option value="all">Tout</option>
+              <option value="month">Ce mois</option>
+            </select>
+          </div>
+          <div id="compta-table"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
